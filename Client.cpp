@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <WinSock2.h>
+#include <WS2tcpip.h>
 #include <string>
 
 #pragma comment(lib, "ws2_32")
@@ -22,14 +23,15 @@ int main()
 	}
 
 	// 2. Server 소켓 주소값 작성 및 초기화
-	// SOCKADDR_IN 로 사용한 즉, (대문자) 방식은 윈도우만 지원합니다.
+	// SOCKADDR_IN 로 사용한 즉, (대문자)방식은 윈도우만 지원합니다.
 	// struct sockaddr_in 이렇게 작성한 방식은 C 언어에서 지원하기에 이 방식이 더 좋습니다.
 	struct sockaddr_in ServerSockAddr;
 	memset(&ServerSockAddr, 0, sizeof(ServerSockAddr));
 
 	// 3. Server 소켓 주소 설정
+	// AF_INET6 는 IPv4 와 IPv6 모두 사용 가능합니다.
 	ServerSockAddr.sin_family = AF_INET;
-	ServerSockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	inet_pton(AF_INET6, "127.0.0.1", &(ServerSockAddr.sin_addr.s_addr));
 	ServerSockAddr.sin_port = htons(5001);
 
 	// 4. Server 소켓 생성 및 설정
@@ -44,10 +46,8 @@ int main()
 	}
 
 	// 6. Server 로 보낼 내용(Buffer) 작성
-	char Buffer[1024] = { 0, };
-	sprintf(Buffer, "give me message.");
-
-	int SentByte = send(ServerSocket, Buffer, (int)(strlen(Buffer) + 1), 0);
+	const char Message[] = "give me message.";
+	int SentByte = send(ServerSocket, Message, (int)strlen(Message), 0);
 
 	cout << "Send Data" << endl;
 	
